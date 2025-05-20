@@ -1,0 +1,31 @@
+<!--
+Citation for the following code:
+Date: 5/6/2025
+Copied/Adapted/Based on:
+Source URL: https://canvas.oregonstate.edu/courses/1999601/pages/exploration-web-application-technology-2?module_item_id=25352948
+-->
+
+<h1>Moves</h1>
+<table>
+    <thead>
+        <tr>
+            {{#each moves.[0]}}
+            <th>
+                {{@key}}
+            </th>
+            {{/each}}
+        </tr>
+    </thead>
+
+    <tbody>
+        {{#each moves}}
+        <tr>
+            <td>{{this.moves_id}}</td>
+            <td>{{this.name}}</td>
+            <td>{{this.power}}</td>
+            <td>{{this.description}}</td>
+            <td>{{this.type_name}}</td>
+        </tr>
+        {{/each}}
+    </tbody>
+</table>

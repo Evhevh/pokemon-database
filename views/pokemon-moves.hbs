@@ -1,0 +1,29 @@
+<!--
+Citation for the following code:
+Date: 5/6/2025
+Copied/Adapted/Based on:
+Source URL: https://canvas.oregonstate.edu/courses/1999601/pages/exploration-web-application-technology-2?module_item_id=25352948
+-->
+
+<h1>Pokemon Moves</h1>
+<table>
+    <thead>
+        <tr>
+            {{#each pokemon_moves.[0]}}
+            <th>
+                {{@key}}
+            </th>
+            {{/each}}
+        </tr>
+    </thead>
+
+    <tbody>
+        {{#each pokemon_moves}}
+        <tr>
+            <td>{{this.pokemon_id}}</td>
+            <td>{{this.name}}</td>
+            <td>{{this.pokemon_move}}</td>
+        </tr>
+        {{/each}}
+    </tbody>
+</table>

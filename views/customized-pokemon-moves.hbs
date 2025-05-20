@@ -1,0 +1,43 @@
+<!--
+Citation for the following code:
+Date: 5/6/2025
+Copied/Adapted/Based on:
+Source URL: https://canvas.oregonstate.edu/courses/1999601/pages/exploration-web-application-technology-2?module_item_id=25352948
+-->
+
+<h1>Customized Pokemon Moves</h1>
+
+<table>
+    <thead>
+        <tr>
+            {{#each customized_pokemon_moves.[0]}}
+            <th>
+                {{@key}}
+            </th>
+            {{/each}}
+            <th></th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {{#each customized_pokemon_moves}}
+        <tr>
+            <td>{{this.customized_pokemon_id}}</td>
+            <td>{{this.pokemon_name}}</td>
+            <td>{{this.move_name}}</td>
+
+            <form id='update_customized_pokemon_move'>
+                <input type='hidden' name='update_customized_pokemon_move' value='{{this.customized_pokemon_move}}' />
+                <input type='hidden' name='update_customized_pokemon_move' value='{{this.move_name}}' />
+                <td>
+                    <button type='submit'>
+                        Update
+                    </button>
+                </td>
+            </form>
+        </tr>
+        </tr>
+        </tr>
+        {{/each}}
+    </tbody>
+</table>
