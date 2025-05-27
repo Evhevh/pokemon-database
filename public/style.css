@@ -12,3 +12,24 @@ input, select { margin-bottom: 4px;margin-right: 12px;}
 nav {background-color: #cecece;padding: 16px;}
 a {margin-left: 16px;}
 .homepageDescription {margin-left: 32px;}
+.scroll-table {
+    max-height: 900px;         /* Adjust height as needed */
+    overflow-y: auto;
+    overflow-x: auto;
+    border: 1px solid #ccc;
+    width: 80%;                /* Responsive width */
+    margin: 0 auto 24px auto;  /* Center horizontally, add bottom margin */
+}
+
+.scroll-table table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-left: 0; /* Remove left margin for tables inside scroll-table */
+    table-layout: auto; /* Let columns size naturally */
+}
+
+.scroll-table th, .scroll-table td {
+    padding: 8px;
+    border: 1px solid #ccc;
+    white-space: nowrap; /* Prevent text from wrapping if you want columns to stay narrow */
+}

@@ -10,52 +10,25 @@ Source URL: https://canvas.oregonstate.edu/courses/1999601/pages/exploration-web
     <thead>
         <tr>
             {{#each customized_parties.[0]}}
-            <th>
-                {{@key}}
-            </th>
+            <th>{{@key}}</th>
             {{/each}}
+            <th></th>
         </tr>
     </thead>
-
     <tbody>
         {{#each customized_parties}}
         <tr>
             <td>{{this.parties_id}}</td>
             <td>{{this.customized_pokemon_id}}</td>
             <td>{{this.pokemon_name}}</td>
+            <td>
+                <form method="POST" action="/customized-parties/delete" style="display:inline;">
+                    <input type="hidden" name="parties_id" value="{{this.parties_id}}" />
+                    <input type="hidden" name="customized_pokemon_id" value="{{this.customized_pokemon_id}}" />
+                    <button type="submit">Delete</button>
+                </form>
+            </td>
         </tr>
         {{/each}}
     </tbody>
 </table>
-
-<h2>Update a Party Member</h2>
-<form class='cuForm' id='update_party_form'>
-    <label for='update_party_id'>Party Member to Update: </label>
-    <select name='update_party_id' id='update_party_id' required>
-        <option value='' disabled selected>Select a Custom Pokemon</option>
-        {{#each customized_pokemon}}
-        <option value='{{this.id}}' required>
-            {{this.id}}
-            -
-            {{this.customized_pokemon_id}}
-            {{this.pokemon_name}}
-        </option>
-        {{/each}}
-    </select>
-
-    <label for='update_person_homeworld'>New Custom Pokemon: </label>
-    <select name='update_pokemon' id='update_pokemon'>
-        <option value='NULL' disabled selected>Select a Custom Pokemon</option>
-        <option value='NULL'>&lt; None &gt;</option>
-        {{#each customized_pokemon}}
-        <option value='{{this.id}}' required>
-            {{this.id}}
-            -
-            {{this.customized_pokemon_id}}
-            {{this.pokemon_name}}
-        </option>
-        {{/each}}
-    </select>
-    
-    <input type='submit' />
-</form>

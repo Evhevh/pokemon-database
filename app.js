@@ -59,7 +59,6 @@ app.get('/parties', async function (req, res) {
 
 app.get('/customized-parties', async function (req, res) {
     try {
-
         const query = `SELECT parties_has_customized_pokemon.parties_id, 
                         customized_pokemon.customized_pokemon_id, 
                         pokemon.name AS 'pokemon_name' 
@@ -71,11 +70,17 @@ app.get('/customized-parties', async function (req, res) {
                         FROM customized_pokemon
                         LEFT JOIN pokemon ON customized_pokemon.pokemon_id = pokemon.pokemon_id
                         ORDER BY customized_pokemon.customized_pokemon_id`;
+        const query3 = `SELECT parties_id FROM parties ORDER BY parties_id;`;
+
         const [customized_parties] = await db.query(query);
         const [customized_pokemon] = await db.query(query2);
+        const [all_parties] = await db.query(query3);
 
-
-        res.render('customized-parties', { customized_parties: customized_parties, customized_pokemon: customized_pokemon });
+        res.render('customized-parties', { 
+            customized_parties: customized_parties, 
+            customized_pokemon: customized_pokemon,
+            all_parties: all_parties // <-- Add this line
+        });
     } catch (error) {
         console.error('Error executing query:', error);
 
@@ -97,51 +102,84 @@ app.get('/customized-pokemon', async function (req, res) {
                         LEFT JOIN abilities on customized_pokemon.abilities_id = abilities.abilities_id
                         LEFT JOIN natures on customized_pokemon.natures_id = natures.natures_id
                         LEFT JOIN items on customized_pokemon.items_id = items.items_id`;
-        const query2 ='SELECT * FROM pokemon;';
+        const query2 = 'SELECT pokemon_id, name FROM pokemon;';
         const query3 ='SELECT * FROM abilities;';
         const query4 ='SELECT * FROM natures;';
         const query5 ='SELECT * FROM items;';
-        const query6 = `SELECT customized_pokemon_id, 
-                        pokemon.name AS 'pokemon_name'
-                        FROM customized_pokemon
-                        LEFT JOIN pokemon ON customized_pokemon.pokemon_id = pokemon.pokemon_id
-                        ORDER BY customized_pokemon.customized_pokemon_id`;
+        const query6 = `
+            SELECT DISTINCT cp.customized_pokemon_id, p.name AS pokemon_name
+            FROM customized_pokemon cp
+            JOIN parties_has_customized_pokemon phcp ON cp.customized_pokemon_id = phcp.customized_pokemon_id
+            JOIN pokemon p ON cp.pokemon_id = p.pokemon_id
+            ORDER BY cp.customized_pokemon_id
+        `;
         const [customized_pokemon] = await db.query(query);
         const [pokemon] = await db.query(query2)
         const [ability] = await db.query(query3)
         const [nature] = await db.query(query4)
         const [item] = await db.query(query5)
         const [update_pokemon] = await db.query(query6)
+        const [parties] = await db.query('SELECT parties_id FROM parties;');
 
-        res.render('customized-pokemon', { customized_pokemon: customized_pokemon, pokemon: pokemon, ability: ability, nature: nature, item:item, update_pokemon: update_pokemon });
+        res.render('customized-pokemon', {
+            customized_pokemon: customized_pokemon,
+            pokemon: pokemon,
+            ability: ability,
+            nature: nature,
+            item:item,
+            update_pokemon: update_pokemon,
+            parties: parties,
+        });
     } catch (error) {
-        console.error('Error executing queries:', error);
-
-        res.status(500).send(
-            'An error occurred while executing the database queries.'
-        );
+        console.error('Error executing query:', error);
+        res.status(500).send('An error occurred while executing the database query.');
     }
 });
 
 app.get('/customized-pokemon-moves', async function (req, res) {
     try {
-        const query = `SELECT customized_pokemon.customized_pokemon_id,
-                        pokemon.name AS 'pokemon_name',
-                        moves.name AS 'move_name'
-                        FROM customized_pokemon
-                        LEFT JOIN pokemon ON customized_pokemon.pokemon_id = pokemon.pokemon_id
-                        LEFT JOIN customized_pokemon_has_moves ON customized_pokemon.customized_pokemon_id = customized_pokemon_has_moves.customized_pokemon_id
-                        LEFT JOIN moves on customized_pokemon_has_moves.moves_id = moves.moves_id
-                        ORDER BY customized_pokemon.customized_pokemon_id`;
-        const [customized_pokemon_moves] = await db.query(query);
+        const query = `
+            SELECT cp.customized_pokemon_id,
+                   p.name AS pokemon_name,
+                   m.moves_id,
+                   m.name AS move_name
+            FROM customized_pokemon cp
+            LEFT JOIN pokemon p ON cp.pokemon_id = p.pokemon_id
+            LEFT JOIN customized_pokemon_has_moves cphm ON cp.customized_pokemon_id = cphm.customized_pokemon_id
+            LEFT JOIN moves m ON cphm.moves_id = m.moves_id
+            ORDER BY cp.customized_pokemon_id, m.name
+        `;
+        const [rows] = await db.query(query);
 
-        res.render('customized-pokemon-moves', { customized_pokemon_moves: customized_pokemon_moves });
+        // Group moves by customized_pokemon_id
+        const grouped = [];
+        const map = new Map();
+        for (const row of rows) {
+            if (!map.has(row.customized_pokemon_id)) {
+                map.set(row.customized_pokemon_id, {
+                    customized_pokemon_id: row.customized_pokemon_id,
+                    pokemon_name: row.pokemon_name,
+                    moves: []
+                });
+                grouped.push(map.get(row.customized_pokemon_id));
+            }
+            if (row.moves_id && row.move_name) {
+                map.get(row.customized_pokemon_id).moves.push({
+                    moves_id: row.moves_id,
+                    move_name: row.move_name
+                });
+            }
+        }
+
+        const [allMoves] = await db.query('SELECT moves_id, name FROM moves ORDER BY name;');
+
+        res.render('customized-pokemon-moves', {
+            customized_pokemon_moves: grouped,
+            all_moves: allMoves
+        });
     } catch (error) {
         console.error('Error executing queries:', error);
-
-        res.status(500).send(
-            'An error occurred while executing the database queries.'
-        );
+        res.status(500).send('An error occurred while executing the database queries.');
     }
 });
 
@@ -187,22 +225,36 @@ app.get('/types', async function (req, res) {
 
 app.get('/pokemon-typing', async function (req, res) {
     try {
+        const query = `
+            SELECT pokemon.pokemon_id, pokemon.name, types.name AS pokemon_type
+            FROM pokemon
+            LEFT JOIN pokemon_has_types ON pokemon.pokemon_id = pokemon_has_types.pokemon_id
+            LEFT JOIN types ON pokemon_has_types.types_id = types.types_id
+            ORDER BY pokemon.pokemon_id, types.name;
+        `;
+        const [rows] = await db.query(query);
 
-        const query = `SELECT pokemon.pokemon_id, pokemon.name, 
-                        types.name as "pokemon_type" FROM pokemon
-                        LEFT JOIN pokemon_has_types ON pokemon.pokemon_id = pokemon_has_types.pokemon_id
-                        LEFT JOIN types ON pokemon_has_types.types_id = types.types_id
-                        ORDER BY pokemon.pokemon_id;`;
-        const [pokemon_typing] = await db.query(query);
+        // Group types by pokemon_id
+        const grouped = [];
+        const map = new Map();
+        for (const row of rows) {
+            if (!map.has(row.pokemon_id)) {
+                map.set(row.pokemon_id, {
+                    pokemon_id: row.pokemon_id,
+                    name: row.name,
+                    types: []
+                });
+                grouped.push(map.get(row.pokemon_id));
+            }
+            if (row.pokemon_type) {
+                map.get(row.pokemon_id).types.push(row.pokemon_type);
+            }
+        }
 
-
-        res.render('pokemon-typing', { pokemon_typing: pokemon_typing });
+        res.render('pokemon-typing', { pokemon_typing: grouped });
     } catch (error) {
         console.error('Error executing query:', error);
-
-        res.status(500).send(
-            'An error occurred while executing the database query.'
-        );
+        res.status(500).send('An error occurred while executing the database query.');
     }
 });
 
@@ -229,21 +281,37 @@ app.get('/abilities', async function (req, res) {
 
 app.get('/pokemon-abilities', async function (req, res) {
     try {
+        const query = `
+            SELECT pokemon.pokemon_id, 
+                   pokemon.name, 
+                   abilities.name AS ability_name
+            FROM pokemon
+            LEFT JOIN pokemon_has_abilities ON pokemon.pokemon_id = pokemon_has_abilities.pokemon_id
+            LEFT JOIN abilities ON pokemon_has_abilities.abilities_id = abilities.abilities_id
+            ORDER BY pokemon.pokemon_id, abilities.name;
+        `;
+        const [rows] = await db.query(query);
 
-        const query = `SELECT pokemon.pokemon_id, 
-                        pokemon.name, 
-                        abilities.name as "pokemon_ability" 
-                        FROM pokemon
-                        LEFT JOIN pokemon_has_abilities ON pokemon.pokemon_id = pokemon_has_abilities.pokemon_id
-                        LEFT JOIN abilities ON pokemon_has_abilities.abilities_id = abilities.abilities_id
-                        ORDER BY pokemon.pokemon_id;`;
-        const [pokemon_abilities] = await db.query(query);
+        // Group abilities by pokemon_id
+        const grouped = [];
+        const map = new Map();
+        for (const row of rows) {
+            if (!map.has(row.pokemon_id)) {
+                map.set(row.pokemon_id, {
+                    pokemon_id: row.pokemon_id,
+                    name: row.name,
+                    abilities: []
+                });
+                grouped.push(map.get(row.pokemon_id));
+            }
+            if (row.ability_name) {
+                map.get(row.pokemon_id).abilities.push(row.ability_name);
+            }
+        }
 
-
-        res.render('pokemon-abilities', { pokemon_abilities: pokemon_abilities });
+        res.render('pokemon-abilities', { pokemon_abilities: grouped });
     } catch (error) {
         console.error('Error executing query:', error);
-
         res.status(500).send(
             'An error occurred while executing the database query.'
         );
@@ -358,8 +426,111 @@ app.post('/reset/database', async function (req, res) {
     }
 });
 
+// CREATE ROUTES
+
+// creates a party
+app.post('/parties/create', async function (req, res) {
+    try {
+        await db.query('CALL createParty()');
+        console.log('Created a new party.');
+        res.redirect('/parties');
+    } catch (error) {
+        console.error('Error creating party:', error);
+        res.status(500).send('An error occurred while creating the party.');
+    }
+});
+
+// creates a customized pokemon
+app.post('/customized-pokemon/create', async function (req, res) {
+    try {
+        // Get partyId and pokemonId from the form submission
+        const partyId = req.body.party_id;      // Adjust the name if your form uses a different field
+        const pokemonId = req.body.create_pokemon;
+
+        // Call the stored procedure
+        await db.query('CALL addPokemonToParty(?, ?)', [partyId, pokemonId]);
+
+        console.log(`Added Pokemon ID ${pokemonId} to Party ID ${partyId}`);
+        res.redirect('/customized-pokemon');
+    } catch (error) {
+        console.error('Error adding Pokemon to party:', error);
+        res.status(500).send('An error occurred while adding the Pokemon to the party.');
+    }
+});
+
+// creates a move to a customized pokemon
+app.post('/customized-pokemon-moves/add-move', async function (req, res) {
+    try {
+        const customizedPokemonId = req.body.customized_pokemon_id;
+        const moveId = req.body.move_id;
+
+        // Find the current party for this customized_pokemon_id
+        const [[partyRow]] = await db.query(
+            `SELECT parties_id FROM parties_has_customized_pokemon WHERE customized_pokemon_id = ? LIMIT 1`,
+            [customizedPokemonId]
+        );
+        const partyId = partyRow ? partyRow.parties_id : null;
+
+        if (!partyId) {
+            res.status(400).send('This custom Pokémon is not assigned to any party.');
+            return;
+        }
+
+        await db.query(
+            'CALL addMoveToPokemon(?, ?, ?)',
+            [partyId, customizedPokemonId, moveId]
+        );
+
+        res.redirect('/customized-pokemon-moves');
+    } catch (error) {
+        console.error('Error adding move:', error);
+        res.status(500).send('An error occurred while adding the move.');
+    }
+});
+
+// UPDATE ROUTES
+
+// updates a pokemon's abilities, nature, and item
+app.post('/customized-pokemon/update', async function (req, res) {
+    try {
+        const customizedPokemonId = req.body.update_pokemon;
+        let abilityId = req.body.update_pokemon_ability;
+        let natureId = req.body.update_pokemon_nature;
+        let itemId = req.body.update_pokemon_item;
+
+        // Convert empty strings or 'NULL' to null
+        if (!abilityId || abilityId === 'NULL') abilityId = null;
+        if (!natureId || natureId === 'NULL') natureId = null;
+        if (!itemId || itemId === 'NULL') itemId = null;
+
+        // Find the current party for this customized_pokemon_id
+        const [[partyRow]] = await db.query(
+            `SELECT parties_id FROM parties_has_customized_pokemon WHERE customized_pokemon_id = ? LIMIT 1`,
+            [customizedPokemonId]
+        );
+        const partyId = partyRow ? partyRow.parties_id : null;
+
+        if (!partyId) {
+            res.status(400).send('This custom Pokémon is not assigned to any party.');
+            return;
+        }
+
+        await db.query(
+            'CALL updatePokemon(?, ?, ?, ?, ?)',
+            [partyId, customizedPokemonId, abilityId, natureId, itemId]
+        );
+
+        res.redirect('/customized-pokemon');
+    } catch (error) {
+        console.error('Error updating customized pokemon:', error);
+        res.status(500).send('An error occurred while updating the customized pokemon.');
+    }
+});
+
 
 // DELETE ROUTES
+
+// deletes a party
 app.post('/parties/delete', async function (req, res) {
     try {
         const partyId = req.body.parties_id;
@@ -374,6 +545,75 @@ app.post('/parties/delete', async function (req, res) {
         res.status(500).send(
             'An error occurred while deleting the party.'
         );
+    }
+});
+
+// deletes a pokemon from customized party
+app.post('/customized-parties/delete', async function (req, res) {
+    try {
+        const partyId = req.body.parties_id;
+        const customizedPokemonId = req.body.customized_pokemon_id;
+
+        // Debug log
+        console.log(`Removing customized_pokemon_id ${customizedPokemonId} from party ${partyId}`);
+
+        await db.query('CALL removePokemonFromParty(?, ?)', [partyId, customizedPokemonId]);
+
+        res.redirect('/customized-parties');
+    } catch (error) {
+        console.error('Error removing customized pokemon from party:', error);
+        res.status(500).send('An error occurred while removing the customized pokemon from the party.');
+    }
+});
+
+// deletes a custom pokemon from customized pokemon
+app.post('/customized-pokemon/delete', async function (req, res) {
+    try {
+        const customizedPokemonId = req.body.customized_pokemon_id;
+
+        // Remove this Pokémon from all parties it's in
+        await db.query(
+            `DELETE FROM parties_has_customized_pokemon WHERE customized_pokemon_id = ?`,
+            [customizedPokemonId]
+        );
+
+        // Clean up any unused customized_pokemon (calls your PL)
+        await db.query('CALL cleanUnusedCustomizedPokemon()');
+
+        res.redirect('/customized-pokemon');
+    } catch (error) {
+        console.error('Error deleting customized pokemon:', error);
+        res.status(500).send('An error occurred while deleting the customized pokemon.');
+    }
+});
+
+// deletes a move from a custom pokemon
+app.post('/customized-pokemon-moves/remove-move', async function (req, res) {
+    try {
+        const customizedPokemonId = req.body.customized_pokemon_id;
+        const moveId = req.body.move_id;
+
+        // Find the current party for this customized_pokemon_id
+        const [[partyRow]] = await db.query(
+            `SELECT parties_id FROM parties_has_customized_pokemon WHERE customized_pokemon_id = ? LIMIT 1`,
+            [customizedPokemonId]
+        );
+        const partyId = partyRow ? partyRow.parties_id : null;
+
+        if (!partyId) {
+            res.status(400).send('This custom Pokémon is not assigned to any party.');
+            return;
+        }
+
+        await db.query(
+            'CALL removeMoveFromPokemon(?, ?, ?)',
+            [partyId, customizedPokemonId, moveId]
+        );
+
+        res.redirect('/customized-pokemon-moves');
+    } catch (error) {
+        console.error('Error removing move:', error);
+        res.status(500).send('An error occurred while removing the move.');
     }
 });
 

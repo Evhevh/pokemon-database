@@ -6,24 +6,28 @@ Source URL: https://canvas.oregonstate.edu/courses/1999601/pages/exploration-web
 -->
 
 <h1>Pokemon Abilities</h1>
-<table>
-    <thead>
-        <tr>
-            {{#each pokemon_abilities.[0]}}
-            <th>
-                {{@key}}
-            </th>
-            {{/each}}
-        </tr>
-    </thead>
 
-    <tbody>
-        {{#each pokemon_abilities}}
-        <tr>
-            <td>{{this.pokemon_id}}</td>
-            <td>{{this.name}}</td>
-            <td>{{this.pokemon_ability}}</td>
-        </tr>
-        {{/each}}
-    </tbody>
-</table>
+<div class="scroll-table">
+    <table>
+        <thead>
+            <tr>
+                <th>Pokemon ID</th>
+                <th>Name</th>
+                <th>Ability 1</th>
+                <th>Ability 2</th>
+                <th>Ability 3</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#each pokemon_abilities}}
+            <tr>
+                <td>{{this.pokemon_id}}</td>
+                <td>{{this.name}}</td>
+                <td>{{this.abilities.[0]}}</td>
+                <td>{{this.abilities.[1]}}</td>
+                <td>{{this.abilities.[2]}}</td>
+            </tr>
+            {{/each}}
+        </tbody>
+    </table>
+</div>

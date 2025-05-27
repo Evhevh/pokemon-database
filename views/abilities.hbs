@@ -4,26 +4,28 @@ Date: 5/6/2025
 Copied/Adapted/Based on:
 Source URL: https://canvas.oregonstate.edu/courses/1999601/pages/exploration-web-application-technology-2?module_item_id=25352948
 -->
-
 <h1>Abilities</h1>
-<table>
-    <thead>
-        <tr>
-            {{#each abilities.[0]}}
-            <th>
-                {{@key}}
-            </th>
-            {{/each}}
-        </tr>
-    </thead>
 
-    <tbody>
-        {{#each abilities}}
-        <tr>
-            <td>{{this.abilities_id}}</td>
-            <td>{{this.name}}</td>
-            <td>{{this.description}}</td>
-        </tr>
-        {{/each}}
-    </tbody>
-</table>
+<div class="scroll-table">
+    <table>
+        <thead>
+            <tr>
+                {{#each abilities.[0]}}
+                <th>
+                    {{@key}}
+                </th>
+                {{/each}}
+            </tr>
+        </thead>
+
+        <tbody>
+            {{#each abilities}}
+            <tr>
+                <td>{{this.abilities_id}}</td>
+                <td>{{this.name}}</td>
+                <td>{{this.description}}</td>
+            </tr>
+            {{/each}}
+        </tbody>
+    </table>
+</div>

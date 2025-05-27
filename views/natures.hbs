@@ -6,23 +6,25 @@ Source URL: https://canvas.oregonstate.edu/courses/1999601/pages/exploration-web
 -->
 
 <h1>Natures</h1>
-<table>
-    <thead>
-        <tr>
-            {{#each natures.[0]}}
-            <th>
-                {{@key}}
-            </th>
-            {{/each}}
-        </tr>
-    </thead>
+<div class="scroll-table">
+    <table>
+        <thead>
+            <tr>
+                {{#each natures.[0]}}
+                <th>
+                    {{@key}}
+                </th>
+                {{/each}}
+            </tr>
+        </thead>
 
-    <tbody>
-        {{#each natures}}
-        <tr>
-            <td>{{this.natures_id}}</td>
-            <td>{{this.name}}</td>
-        </tr>
-        {{/each}}
-    </tbody>
-</table>
+        <tbody>
+            {{#each natures}}
+            <tr>
+                <td>{{this.natures_id}}</td>
+                <td>{{this.name}}</td>
+            </tr>
+            {{/each}}
+        </tbody>
+    </table>
+</div>

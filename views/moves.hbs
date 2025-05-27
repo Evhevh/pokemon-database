@@ -6,26 +6,28 @@ Source URL: https://canvas.oregonstate.edu/courses/1999601/pages/exploration-web
 -->
 
 <h1>Moves</h1>
-<table>
-    <thead>
-        <tr>
-            {{#each moves.[0]}}
-            <th>
-                {{@key}}
-            </th>
-            {{/each}}
-        </tr>
-    </thead>
+<div class="scroll-table">
+    <table>
+        <thead>
+            <tr>
+                {{#each moves.[0]}}
+                <th>
+                    {{@key}}
+                </th>
+                {{/each}}
+            </tr>
+        </thead>
 
-    <tbody>
-        {{#each moves}}
-        <tr>
-            <td>{{this.moves_id}}</td>
-            <td>{{this.name}}</td>
-            <td>{{this.power}}</td>
-            <td>{{this.description}}</td>
-            <td>{{this.type_name}}</td>
-        </tr>
-        {{/each}}
-    </tbody>
-</table>
+        <tbody>
+            {{#each moves}}
+            <tr>
+                <td>{{this.moves_id}}</td>
+                <td>{{this.name}}</td>
+                <td>{{this.power}}</td>
+                <td>{{this.description}}</td>
+                <td>{{this.type_name}}</td>
+            </tr>
+            {{/each}}
+        </tbody>
+    </table>
+</div>

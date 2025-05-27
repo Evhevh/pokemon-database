@@ -6,24 +6,25 @@ Source URL: https://canvas.oregonstate.edu/courses/1999601/pages/exploration-web
 -->
 
 <h1>Pokemon Typing</h1>
-<table>
-    <thead>
-        <tr>
-            {{#each pokemon_typing.[0]}}
-            <th>
-                {{@key}}
-            </th>
+<div class="scroll-table">
+    <table>
+        <thead>
+            <tr>
+                <th>Pokemon ID</th>
+                <th>Name</th>
+                <th>Type 1</th>
+                <th>Type 2</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#each pokemon_typing}}
+            <tr>
+                <td>{{this.pokemon_id}}</td>
+                <td>{{this.name}}</td>
+                <td>{{this.types.[0]}}</td>
+                <td>{{this.types.[1]}}</td>
+            </tr>
             {{/each}}
-        </tr>
-    </thead>
-
-    <tbody>
-        {{#each pokemon_typing}}
-        <tr>
-            <td>{{this.pokemon_id}}</td>
-            <td>{{this.name}}</td>
-            <td>{{this.pokemon_type}}</td>
-        </tr>
-        {{/each}}
-    </tbody>
-</table>
+        </tbody>
+    </table>
+</div>

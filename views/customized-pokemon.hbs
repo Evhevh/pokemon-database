@@ -27,17 +27,12 @@ Source URL: https://canvas.oregonstate.edu/courses/1999601/pages/exploration-web
             <td>{{this.ability_name}}</td>
             <td>{{this.nature_name}}</td>
             <td>{{this.item_name}}</td>
-
-            <form id='delete_customized_pokemon'>
-                <input type='hidden' name='delete_customized_pokemon_id' value='{{this.customized_pokemon_id}}' />
-                <input type='hidden' name='delete_customized_pokemon_details' value='{{this.pokemon_name}} {{this.ability_name}} {{this.nature_name}} {{this.item_name}}' />
-                <td>
-                    <button type='submit'>
-                        Delete
-                    </button>
-                </td>
-            </form>
-        </tr>
+            <td>
+                <form method="POST" action="/customized-pokemon/delete" style="display:inline;">
+                    <input type="hidden" name="customized_pokemon_id" value="{{this.customized_pokemon_id}}" />
+                    <button type="submit">Delete</button>
+                </form>
+            </td>
         </tr>
         {{/each}}
     </tbody>
@@ -45,66 +40,44 @@ Source URL: https://canvas.oregonstate.edu/courses/1999601/pages/exploration-web
 
 <h2>Create a Custom Pokemon</h2>
 <form class='cuForm' id='create_customized_pokemon_form' method='POST' action='/customized-pokemon/create'>
+    <label for='party_id'>Party: </label>
+    <select name='party_id' id='party_id' required>
+        <option value='NULL' selected>Select a Party</option>
+        {{#each parties}}
+        <option value='{{this.parties_id}}'>{{this.parties_id}}</option>
+        {{/each}}
+    </select>
     <label for='create_pokemon'>Pokemon: </label>
-    <select name='create_pokemon' id='create_pokemon'>
-        <option value='NULL' selected>Select a Pokemon</option>
+    <select name='create_pokemon' id='create_pokemon' required>
+        <option value=''>Select a Pokemon</option>
         {{#each pokemon}}
-        <option value='{{this.id}}' required>{{this.name}}</option>
+        <option value='{{this.pokemon_id}}'>{{this.name}}</option>
         {{/each}}
     </select>
-    <label for='create_pokemon_ability'>Ability: </label>
-    <select name='create_pokemon_ability' id='create_pokemon_ability'>
-        <option value='NULL' selected>Select an Ability</option>
-        {{#each ability}}
-        <option value='{{this.id}}' required>{{this.name}}</option>
-        {{/each}}
-    </select>
-    <label for='create_pokemon_nature'>Nature: </label>
-    <select name='create_pokemon_nature' id='create_pokemon_nature'>
-        <option value='NULL' selected>Select a Nature</option>
-        {{#each nature}}
-        <option value='{{this.id}}' required>{{this.name}}</option>
-        {{/each}}
-    </select>
-    <label for='create_pokemon_item'>Item: </label>
-    <select name='create_pokemon_item' id='create_pokemon_item'>
-        <option value='NULL' selected>Select an Item</option>
-        <option value='NULL'>&lt; None &gt;</option>
-        {{#each item}}
-        <option value='{{this.id}}'>{{this.name}}</option>
-        {{/each}}
-    </select>
-
     <input type='submit' />
 </form>
 
 <h2>Update a Custom Pokemon</h2>
-<form class='cuForm' id='update_customized_pokemon_form'>
+<form class='cuForm' id='update_customized_pokemon_form' method='POST' action='/customized-pokemon/update'>
     <label for='update_pokemon'>Pokemon: </label>
-    <select name='update_pokemon' id='update_pokemon'>
+    <select name='update_pokemon' id='update_pokemon' required>
         <option value='NULL' selected>Select a Custom Pokemon</option>
-        <option value='NULL'>&lt; None &gt;</option>
         {{#each update_pokemon}}
-        <option value='{{this.id}}' required>
-            {{this.id}}
-            -
-            {{this.customized_pokemon_id}}
-            {{this.pokemon_name}}
-        </option>
+        <option value='{{this.customized_pokemon_id}}'>{{this.customized_pokemon_id}} - {{this.pokemon_name}}</option>
         {{/each}}
     </select>
     <label for='update_pokemon_ability'>Ability: </label>
-    <select name='update_pokemon_ability' id='update_pokemon_ability'>
+    <select name='update_pokemon_ability' id='update_pokemon_ability' required>
         <option value='NULL' selected>Select an Ability</option>
         {{#each ability}}
-        <option value='{{this.id}}' required>{{this.name}}</option>
+        <option value='{{this.abilities_id}}'>{{this.name}}</option>
         {{/each}}
     </select>
     <label for='update_pokemon_nature'>Nature: </label>
-    <select name='update_pokemon_nature' id='update_pokemon_nature'>
+    <select name='update_pokemon_nature' id='update_pokemon_nature' required>
         <option value='NULL' selected>Select a Nature</option>
         {{#each nature}}
-        <option value='{{this.id}}' required>{{this.name}}</option>
+        <option value='{{this.natures_id}}'>{{this.name}}</option>
         {{/each}}
     </select>
     <label for='update_pokemon_item'>Item: </label>
@@ -112,9 +85,9 @@ Source URL: https://canvas.oregonstate.edu/courses/1999601/pages/exploration-web
         <option value='NULL' selected>Select an Item</option>
         <option value='NULL'>&lt; None &gt;</option>
         {{#each item}}
-        <option value='{{this.id}}'>{{this.name}}</option>
+        <option value='{{this.items_id}}'>{{this.name}}</option>
         {{/each}}
     </select>
-
     <input type='submit' />
 </form>
+<p>Note: You must select a Pokemon, Ability and a Nature. Item is optional.</p>

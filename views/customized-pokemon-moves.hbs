@@ -10,12 +10,13 @@ Source URL: https://canvas.oregonstate.edu/courses/1999601/pages/exploration-web
 <table>
     <thead>
         <tr>
-            {{#each customized_pokemon_moves.[0]}}
-            <th>
-                {{@key}}
-            </th>
-            {{/each}}
-            <th></th>
+            <th>Custom Pokemon ID</th>
+            <th>Pokemon Name</th>
+            <th>Move 1</th>
+            <th>Move 2</th>
+            <th>Move 3</th>
+            <th>Move 4</th>
+            <th>Actions</th>
         </tr>
     </thead>
 
@@ -24,19 +25,40 @@ Source URL: https://canvas.oregonstate.edu/courses/1999601/pages/exploration-web
         <tr>
             <td>{{this.customized_pokemon_id}}</td>
             <td>{{this.pokemon_name}}</td>
-            <td>{{this.move_name}}</td>
-
-            <form id='update_customized_pokemon_move'>
-                <input type='hidden' name='update_customized_pokemon_move' value='{{this.customized_pokemon_move}}' />
-                <input type='hidden' name='update_customized_pokemon_move' value='{{this.move_name}}' />
-                <td>
-                    <button type='submit'>
-                        Update
-                    </button>
-                </td>
-            </form>
-        </tr>
-        </tr>
+            <td>{{this.moves.[0].move_name}}</td>
+            <td>{{this.moves.[1].move_name}}</td>
+            <td>{{this.moves.[2].move_name}}</td>
+            <td>{{this.moves.[3].move_name}}</td>
+            <td>
+                <div style="margin-bottom: 4px;">
+                    <!-- Add Move Form -->
+                    <form method="POST" action="/customized-pokemon-moves/add-move" style="display:inline;">
+                        <input type="hidden" name="customized_pokemon_id" value="{{this.customized_pokemon_id}}" />
+                        <label>Add:</label>
+                        <select name="move_id" required>
+                            <option value="">Select Move</option>
+                            {{#each ../all_moves}}
+                            <option value="{{this.moves_id}}">{{this.name}}</option>
+                            {{/each}}
+                        </select>
+                        <button type="submit">Add</button>
+                    </form>
+                </div>
+                <div>
+                    <!-- Remove Move Form -->
+                    <form method="POST" action="/customized-pokemon-moves/remove-move" style="display:inline;">
+                        <input type="hidden" name="customized_pokemon_id" value="{{this.customized_pokemon_id}}" />
+                        <label>Remove:</label>
+                        <select name="move_id" required>
+                            <option value="">Select Move</option>
+                            {{#each moves}}
+                            <option value="{{this.moves_id}}">{{this.move_name}}</option>
+                            {{/each}}
+                        </select>
+                        <button type="submit">Remove</button>
+                    </form>
+                </div>
+            </td>
         </tr>
         {{/each}}
     </tbody>

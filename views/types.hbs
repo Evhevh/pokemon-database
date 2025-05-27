@@ -6,23 +6,26 @@ Source URL: https://canvas.oregonstate.edu/courses/1999601/pages/exploration-web
 -->
 
 <h1>Types</h1>
-<table>
-    <thead>
-        <tr>
-            {{#each types.[0]}}
-            <th>
-                {{@key}}
-            </th>
-            {{/each}}
-        </tr>
-    </thead>
 
-    <tbody>
-        {{#each types}}
-        <tr>
-            <td>{{this.types_id}}</td>
-            <td>{{this.name}}</td>
-        </tr>
-        {{/each}}
-    </tbody>
-</table>
+<div class="scroll-table">
+    <table>
+        <thead>
+            <tr>
+                {{#each types.[0]}}
+                <th>
+                    {{@key}}
+                </th>
+                {{/each}}
+            </tr>
+        </thead>
+
+        <tbody>
+            {{#each types}}
+            <tr>
+                <td>{{this.types_id}}</td>
+                <td>{{this.name}}</td>
+            </tr>
+            {{/each}}
+        </tbody>
+    </table>
+</div>
