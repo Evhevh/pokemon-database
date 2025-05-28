@@ -92,6 +92,15 @@ Source URL: https://canvas.oregonstate.edu/courses/1999601/pages/exploration-web
 </form>
 <p>Note: You must select a Pokemon, Ability and a Nature. Item is optional.</p>
 
+<!--
+Citation for the use of AI Tools
+Date: 5/27/2025
+Prompts used to generate the script:
+"Write a JavaScript function that listens for changes on a dropdown menu with the ID 'update_pokemon'. 
+When a new option is selected, it should fetch abilities for the selected Pokemon from the server and populate another dropdown with the ID 'update_pokemon_ability'. 
+The server endpoint is '/api/customized-pokemon/{customPokemonId}/abilities'."
+-->
+
 <script>
 document.getElementById('update_pokemon').addEventListener('change', async function() {
     const customPokemonId = this.value;

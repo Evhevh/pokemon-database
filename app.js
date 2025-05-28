@@ -410,6 +410,13 @@ app.get('/natures', async function (req, res) {
     }
 });
 
+//Citation for the use of AI Tools
+//Date: 5/27/2025
+//Prompts used to generate the following API endpoint code:
+// "Create an Express.js API endpoint that retrieves abilities for a specific customized Pokémon by its ID. 
+// The endpoint should call the stored procedure getAbilitiesByPokemon that returns the ability names, and then map those names to their corresponding IDs from the database. 
+// The response should be in JSON format."
+
 // get abilities for a specific customized pokemon
 app.get('/api/customized-pokemon/:id/abilities', async function (req, res) {
     try {
@@ -436,6 +443,13 @@ app.get('/api/customized-pokemon/:id/abilities', async function (req, res) {
         res.status(500).json({ error: 'Failed to fetch abilities.' });
     }
 });
+
+//Citation for the use of AI Tools
+//Date: 5/27/2025
+//Prompts used to generate the following API endpoint code:
+// "Create an Express.js API endpoint that retrieves moves for a specific customized Pokémon by its ID.
+// The endpoint should call the stored procedure getMovesByPokemon that returns the move names, and then map those names to their corresponding IDs from the database.
+// The response should be in JSON format."
 
 // get moves for a specific customized pokemon
 app.get('/api/customized-pokemon/:id/moves', async function (req, res) {
