@@ -20,9 +20,15 @@ const PORT = 6742;
 const db = require('./database/db-connector');
 
 // Handlebars
-const { engine } = require('express-handlebars'); // Import express-handlebars engine
-app.engine('.hbs', engine({ extname: '.hbs' })); // Create instance of handlebars
-app.set('view engine', '.hbs'); // Use handlebars engine for *.hbs files.
+const { engine } = require('express-handlebars');
+app.engine('.hbs', engine({
+    extname: '.hbs',
+    helpers: {
+        length: arr => (Array.isArray(arr) ? arr.length : 0),
+        eq: (a, b) => a === b
+    }
+}));
+app.set('view engine', '.hbs');
 
 // ########################################
 // ########## ROUTE HANDLERS
@@ -404,6 +410,69 @@ app.get('/natures', async function (req, res) {
     }
 });
 
+// get abilities for a specific customized pokemon
+app.get('/api/customized-pokemon/:id/abilities', async function (req, res) {
+    try {
+        const customizedPokemonId = req.params.id;
+        console.log('API called for customizedPokemonId:', customizedPokemonId);
+        const [abilities] = await db.query('CALL getAbilitiesByPokemon(?, ?)', [customizedPokemonId, '']);
+        console.log('SP result:', abilities);
+
+        // If abilities[0] only has names, fetch IDs:
+        const abilityNames = abilities[0].map(a => a['Ability Name']);
+        const [ids] = await db.query(
+            `SELECT abilities_id, name FROM abilities WHERE name IN (${abilityNames.map(() => '?').join(',')})`,
+            abilityNames
+        );
+        const nameToId = {};
+        ids.forEach(a => { nameToId[a.name] = a.abilities_id; });
+        const abilitiesWithId = abilities[0].map(a => ({
+            ...a,
+            abilities_id: nameToId[a['Ability Name']]
+        }));
+        res.json(abilitiesWithId);
+    } catch (error) {
+        console.error('Error fetching abilities:', error);
+        res.status(500).json({ error: 'Failed to fetch abilities.' });
+    }
+});
+
+// get moves for a specific customized pokemon
+app.get('/api/customized-pokemon/:id/moves', async function (req, res) {
+    try {
+        const customizedPokemonId = req.params.id;
+        // Get the base pokemon_id for this customized_pokemon_id
+        const [[{ pokemon_id } = {}]] = await db.query(
+            'SELECT pokemon_id FROM customized_pokemon WHERE customized_pokemon_id = ?',
+            [customizedPokemonId]
+        );
+        if (!pokemon_id) {
+            return res.status(404).json({ error: 'Pokemon not found.' });
+        }
+        // Call your existing PL, which returns only move names
+        const [moves] = await db.query('CALL getMovesByPokemon(?, ?)', [pokemon_id, '']);
+        // Now, for each move, look up its ID (batch query for efficiency)
+        const moveNames = moves[0].map(m => m['Move Name']);
+        if (moveNames.length === 0) return res.json([]);
+        const [moveIds] = await db.query(
+            `SELECT moves_id, name FROM moves WHERE name IN (${moveNames.map(() => '?').join(',')})`,
+            moveNames
+        );
+        // Map move name to ID
+        const nameToId = {};
+        moveIds.forEach(m => { nameToId[m.name] = m.moves_id; });
+        // Attach moves_id to each move
+        const movesWithId = moves[0].map(m => ({
+            ...m,
+            moves_id: nameToId[m['Move Name']]
+        }));
+        res.json(movesWithId);
+    } catch (error) {
+        console.error('Error fetching moves:', error);
+        res.status(500).json({ error: 'Failed to fetch moves.' });
+    }
+});
+
 // Citation for the following code:
 // Date: 5/19/2025
 // Copied/Adapted/Based on:
@@ -499,7 +568,10 @@ app.post('/customized-pokemon/update', async function (req, res) {
         let itemId = req.body.update_pokemon_item;
 
         // Convert empty strings or 'NULL' to null
-        if (!abilityId || abilityId === 'NULL') abilityId = null;
+        if (!abilityId || abilityId === 'NULL' || abilityId === 'undefined') {
+            // Handle error or set to null if allowed
+            return res.status(400).send('You must select a valid ability.');
+        }
         if (!natureId || natureId === 'NULL') natureId = null;
         if (!itemId || itemId === 'NULL') itemId = null;
 

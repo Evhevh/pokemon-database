@@ -31,18 +31,20 @@ Source URL: https://canvas.oregonstate.edu/courses/1999601/pages/exploration-web
             <td>{{this.moves.[3].move_name}}</td>
             <td>
                 <div style="margin-bottom: 4px;">
-                    <!-- Add Move Form -->
-                    <form method="POST" action="/customized-pokemon-moves/add-move" style="display:inline;">
-                        <input type="hidden" name="customized_pokemon_id" value="{{this.customized_pokemon_id}}" />
-                        <label>Add:</label>
-                        <select name="move_id" required>
-                            <option value="">Select Move</option>
-                            {{#each ../all_moves}}
-                            <option value="{{this.moves_id}}">{{this.name}}</option>
-                            {{/each}}
-                        </select>
-                        <button type="submit">Add</button>
-                    </form>
+                    {{#if (eq (length this.moves) 4)}}
+                        <span style="color: rgb(100, 100, 100); font-weight: bold;">Max 4 Moves</span>
+                    {{else}}
+                        <!-- Add Move Form -->
+                        <form method="POST" action="/customized-pokemon-moves/add-move" style="display:inline;">
+                            <input type="hidden" name="customized_pokemon_id" value="{{this.customized_pokemon_id}}" />
+                            <label>Add:</label>
+                            <select name="move_id" class="add-move-select" data-customized-pokemon-id="{{this.customized_pokemon_id}}" required>
+                                <option value="">Select Move</option>
+                                <!-- Options will be loaded by JS -->
+                            </select>
+                            <button type="submit">Add</button>
+                        </form>
+                    {{/if}}
                 </div>
                 <div>
                     <!-- Remove Move Form -->
@@ -63,3 +65,25 @@ Source URL: https://canvas.oregonstate.edu/courses/1999601/pages/exploration-web
         {{/each}}
     </tbody>
 </table>
+
+<script>
+document.querySelectorAll('.add-move-select').forEach(function(select) {
+    select.addEventListener('focus', async function() {
+        const customizedPokemonId = this.getAttribute('data-customized-pokemon-id');
+        // Only load if not already loaded
+        if (this.options.length > 1) return;
+        try {
+            const res = await fetch(`/api/customized-pokemon/${customizedPokemonId}/moves`);
+            const moves = await res.json();
+            moves.forEach(move => {
+                const opt = document.createElement('option');
+                opt.value = move['moves_id'] || move['Move ID'] || move['id']; // Use the ID!
+                opt.textContent = move['Move Name'] || move['move_name'] || move['name'];
+                this.appendChild(opt);
+            });
+        } catch (e) {
+            console.error('Failed to fetch moves:', e);
+        }
+    });
+});
+</script>

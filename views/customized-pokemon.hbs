@@ -91,3 +91,27 @@ Source URL: https://canvas.oregonstate.edu/courses/1999601/pages/exploration-web
     <input type='submit' />
 </form>
 <p>Note: You must select a Pokemon, Ability and a Nature. Item is optional.</p>
+
+<script>
+document.getElementById('update_pokemon').addEventListener('change', async function() {
+    const customPokemonId = this.value;
+    const abilitySelect = document.getElementById('update_pokemon_ability');
+    abilitySelect.innerHTML = '<option value="NULL" selected>Select an Ability</option>';
+    if (customPokemonId && customPokemonId !== 'NULL') {
+        try {
+            console.log('Fetching abilities for customPokemonId:', customPokemonId);
+            const res = await fetch(`/api/customized-pokemon/${customPokemonId}/abilities`);
+            const abilities = await res.json();
+            console.log('Received abilities:', abilities);
+            abilities.forEach(ability => {
+                const opt = document.createElement('option');
+                opt.value = ability['abilities_id'] || ability['Ability ID'] || ability['id'];
+                opt.textContent = ability['Ability Name'] || ability['name'];
+                abilitySelect.appendChild(opt);
+            });
+        } catch (e) {
+            console.error('Failed to fetch abilities:', e);
+        }
+    }
+});
+</script>
