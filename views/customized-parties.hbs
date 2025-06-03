@@ -22,6 +22,7 @@ Source URL: https://canvas.oregonstate.edu/courses/1999601/pages/exploration-web
             <td>{{this.customized_pokemon_id}}</td>
             <td>{{this.pokemon_name}}</td>
             <td>
+                <!-- delete column -->
                 <form method="POST" action="/customized-parties/delete" style="display:inline;">
                     <input type="hidden" name="parties_id" value="{{this.parties_id}}" />
                     <input type="hidden" name="customized_pokemon_id" value="{{this.customized_pokemon_id}}" />
@@ -32,3 +33,26 @@ Source URL: https://canvas.oregonstate.edu/courses/1999601/pages/exploration-web
         {{/each}}
     </tbody>
 </table>
+
+
+<!-- Update form for changing pokemon party assignment -->
+<h2>Update Customized Pokemon Party Assignment</h2>
+<form method="POST" action="/customized-parties/update" style="margin-bottom: 2em;">
+    <label for="customized_pokemon_id">Custom Pokemon:</label>
+    <select name="customized_pokemon_id" id="customized_pokemon_id" required>
+        <option value="">Select Custom Pokemon</option>
+        {{#each customized_pokemon}}
+        <option value="{{this.customized_pokemon_id}}">
+            {{this.customized_pokemon_id}} - {{this.pokemon_name}}
+        </option>
+        {{/each}}
+    </select>
+    <label for="new_party_id">New Party:</label>
+    <select name="new_party_id" id="new_party_id" required>
+        <option value="">Select Party</option>
+        {{#each all_parties}}
+        <option value="{{this.parties_id}}">{{this.parties_id}}</option>
+        {{/each}}
+    </select>
+    <button type="submit">Update Party</button>
+</form>
