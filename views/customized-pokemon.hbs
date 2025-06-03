@@ -28,6 +28,7 @@ Source URL: https://canvas.oregonstate.edu/courses/1999601/pages/exploration-web
             <td>{{this.nature_name}}</td>
             <td>{{this.item_name}}</td>
             <td>
+                <!-- delete column -->
                 <form method="POST" action="/customized-pokemon/delete" style="display:inline;">
                     <input type="hidden" name="customized_pokemon_id" value="{{this.customized_pokemon_id}}" />
                     <button type="submit">Delete</button>
@@ -38,6 +39,7 @@ Source URL: https://canvas.oregonstate.edu/courses/1999601/pages/exploration-web
     </tbody>
 </table>
 
+<!-- Create form that creates a custom pokemon with a party -->
 <h2>Create a Custom Pokemon</h2>
 <form class='cuForm' id='create_customized_pokemon_form' method='POST' action='/customized-pokemon/create'>
     <label for='party_id'>Party: </label>
@@ -57,6 +59,7 @@ Source URL: https://canvas.oregonstate.edu/courses/1999601/pages/exploration-web
     <input type='submit' />
 </form>
 
+<!-- Update form for changing pokemon non-move attributes -->
 <h2>Update a Custom Pokemon</h2>
 <form class='cuForm' id='update_customized_pokemon_form' method='POST' action='/customized-pokemon/update'>
     <label for='update_pokemon'>Pokemon: </label>

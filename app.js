@@ -19,6 +19,12 @@ const PORT = 6742;
 // Database
 const db = require('./database/db-connector');
 
+// Citation for the use of AI Tools
+// Date: 5/27/2025
+// Prompts used to generate the following grouping code:
+// "How could I set up helpers so that my handlebar templates can see if my pokemon move array has 4 moves or less?
+// I want to use this to conditionally render a button that allows the user to add a move to a pokemon."
+
 // Handlebars
 const { engine } = require('express-handlebars');
 app.engine('.hbs', engine({
@@ -85,7 +91,7 @@ app.get('/customized-parties', async function (req, res) {
         res.render('customized-parties', { 
             customized_parties: customized_parties, 
             customized_pokemon: customized_pokemon,
-            all_parties: all_parties // <-- Add this line
+            all_parties: all_parties
         });
     } catch (error) {
         console.error('Error executing query:', error);
@@ -141,6 +147,12 @@ app.get('/customized-pokemon', async function (req, res) {
         res.status(500).send('An error occurred while executing the database query.');
     }
 });
+
+// Citation for the use of AI Tools
+// Date: 5/27/2025
+// Prompts used to generate the following grouping code:
+// "Write JavaScript code to group an array of objects by a specific property (pokemon_id), 
+// collecting another property (pokemon_moves) into an array for each group."
 
 app.get('/customized-pokemon-moves', async function (req, res) {
     try {
@@ -229,6 +241,12 @@ app.get('/types', async function (req, res) {
     }
 });
 
+// Citation for the use of AI Tools
+// Date: 5/27/2025
+// Prompts used to generate the following grouping code:
+// "Write JavaScript code to group an array of objects by a specific property (pokemon_id), 
+// collecting another property (pokemon_type) into an array for each group."
+
 app.get('/pokemon-typing', async function (req, res) {
     try {
         const query = `
@@ -284,6 +302,12 @@ app.get('/abilities', async function (req, res) {
         );
     }
 });
+
+// Citation for the use of AI Tools
+// Date: 5/27/2025
+// Prompts used to generate the following grouping code:
+// "Write JavaScript code to group an array of objects by a specific property (pokemon_id), 
+// collecting another property (ability_name) into an array for each group."
 
 app.get('/pokemon-abilities', async function (req, res) {
     try {
@@ -526,11 +550,9 @@ app.post('/parties/create', async function (req, res) {
 // creates a customized pokemon
 app.post('/customized-pokemon/create', async function (req, res) {
     try {
-        // Get partyId and pokemonId from the form submission
-        const partyId = req.body.party_id;      // Adjust the name if your form uses a different field
+        const partyId = req.body.party_id; 
         const pokemonId = req.body.create_pokemon;
 
-        // Call the stored procedure
         await db.query('CALL addPokemonToParty(?, ?)', [partyId, pokemonId]);
 
         console.log(`Added Pokemon ID ${pokemonId} to Party ID ${partyId}`);
@@ -541,13 +563,12 @@ app.post('/customized-pokemon/create', async function (req, res) {
     }
 });
 
-// creates a move to a customized pokemon
+// adds a move to a customized pokemon
 app.post('/customized-pokemon-moves/add-move', async function (req, res) {
     try {
         const customizedPokemonId = req.body.customized_pokemon_id;
         const moveId = req.body.move_id;
 
-        // Find the current party for this customized_pokemon_id
         const [[partyRow]] = await db.query(
             `SELECT parties_id FROM parties_has_customized_pokemon WHERE customized_pokemon_id = ? LIMIT 1`,
             [customizedPokemonId]
@@ -581,15 +602,12 @@ app.post('/customized-pokemon/update', async function (req, res) {
         let natureId = req.body.update_pokemon_nature;
         let itemId = req.body.update_pokemon_item;
 
-        // Convert empty strings or 'NULL' to null
         if (!abilityId || abilityId === 'NULL' || abilityId === 'undefined') {
-            // Handle error or set to null if allowed
             return res.status(400).send('You must select a valid ability.');
         }
         if (!natureId || natureId === 'NULL') natureId = null;
         if (!itemId || itemId === 'NULL') itemId = null;
 
-        // Find the current party for this customized_pokemon_id
         const [[partyRow]] = await db.query(
             `SELECT parties_id FROM parties_has_customized_pokemon WHERE customized_pokemon_id = ? LIMIT 1`,
             [customizedPokemonId]
@@ -613,6 +631,28 @@ app.post('/customized-pokemon/update', async function (req, res) {
     }
 });
 
+// updates a customized pokemon's party
+app.post('/customized-parties/update', async function (req, res) {
+    try {
+        const customizedPokemonId = req.body.customized_pokemon_id;
+        const newPartyId = req.body.new_party_id;
+
+        await db.query(
+            'DELETE FROM parties_has_customized_pokemon WHERE customized_pokemon_id = ?',
+            [customizedPokemonId]
+        );
+
+        await db.query(
+            'INSERT INTO parties_has_customized_pokemon (parties_id, customized_pokemon_id) VALUES (?, ?)',
+            [newPartyId, customizedPokemonId]
+        );
+
+        res.redirect('/customized-parties');
+    } catch (error) {
+        console.error('Error updating party assignment:', error);
+        res.status(500).send('An error occurred while updating the party assignment.');
+    }
+});
 
 // DELETE ROUTES
 
@@ -634,13 +674,17 @@ app.post('/parties/delete', async function (req, res) {
     }
 });
 
+// Citation for the use of AI Tools
+// Date: 5/27/2025
+// Prompts used to generate the following grouping code:
+// "Could you add a debug log for me so that I can see which customized_pokemon_id is being removed from the party?"
+
 // deletes a pokemon from customized party
 app.post('/customized-parties/delete', async function (req, res) {
     try {
         const partyId = req.body.parties_id;
         const customizedPokemonId = req.body.customized_pokemon_id;
 
-        // Debug log
         console.log(`Removing customized_pokemon_id ${customizedPokemonId} from party ${partyId}`);
 
         await db.query('CALL removePokemonFromParty(?, ?)', [partyId, customizedPokemonId]);
@@ -657,13 +701,11 @@ app.post('/customized-pokemon/delete', async function (req, res) {
     try {
         const customizedPokemonId = req.body.customized_pokemon_id;
 
-        // Remove this Pokémon from all parties it's in
         await db.query(
             `DELETE FROM parties_has_customized_pokemon WHERE customized_pokemon_id = ?`,
             [customizedPokemonId]
         );
 
-        // Clean up any unused customized_pokemon (calls your PL)
         await db.query('CALL cleanUnusedCustomizedPokemon()');
 
         res.redirect('/customized-pokemon');
@@ -679,7 +721,6 @@ app.post('/customized-pokemon-moves/remove-move', async function (req, res) {
         const customizedPokemonId = req.body.customized_pokemon_id;
         const moveId = req.body.move_id;
 
-        // Find the current party for this customized_pokemon_id
         const [[partyRow]] = await db.query(
             `SELECT parties_id FROM parties_has_customized_pokemon WHERE customized_pokemon_id = ? LIMIT 1`,
             [customizedPokemonId]

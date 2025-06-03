@@ -30,24 +30,26 @@ Source URL: https://canvas.oregonstate.edu/courses/1999601/pages/exploration-web
             <td>{{this.moves.[2].move_name}}</td>
             <td>{{this.moves.[3].move_name}}</td>
             <td>
+                <!-- Citation for the use of AI Tools
+                    Date: 5/27/2025
+                    Prompts used to generate the following grouping code:
+                    "How do I use the helper functions that I setup in the app.js to make it so that the form is able to see if a pokemon has the max amount of moves or
+                    not. If so, can you make it so that it prevents the user from adding a move to the custom pokemon until the user removes a move." -->
                 <div style="margin-bottom: 4px;">
                     {{#if (eq (length this.moves) 4)}}
                         <span style="color: rgb(100, 100, 100); font-weight: bold;">Max 4 Moves</span>
                     {{else}}
-                        <!-- Add Move Form -->
                         <form method="POST" action="/customized-pokemon-moves/add-move" style="display:inline;">
                             <input type="hidden" name="customized_pokemon_id" value="{{this.customized_pokemon_id}}" />
                             <label>Add:</label>
                             <select name="move_id" class="add-move-select" data-customized-pokemon-id="{{this.customized_pokemon_id}}" required>
                                 <option value="">Select Move</option>
-                                <!-- Options will be loaded by JS -->
                             </select>
                             <button type="submit">Add</button>
                         </form>
                     {{/if}}
                 </div>
                 <div>
-                    <!-- Remove Move Form -->
                     <form method="POST" action="/customized-pokemon-moves/remove-move" style="display:inline;">
                         <input type="hidden" name="customized_pokemon_id" value="{{this.customized_pokemon_id}}" />
                         <label>Remove:</label>
